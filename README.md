@@ -116,3 +116,16 @@ Cliente → [GET /metrics?last_quotes=100] → API → Validação → OK
 * 📌 **Validação:** Sempre ocorre antes de interações externas.
 * 🔄 **Tentativas:** Operações críticas podem ter múltiplas tentativas.
 * ⚙️ **Assíncrono:** O salvamento no Clickhouse é feito em segundo plano após resposta de sucesso na cotação.
+
+-----
+
+### Regras adicionais
+- recipient.address.zipcode -> regex de CEP
+- volumes[*].category -> https://dev.freterapido.com.br/common/tipos_de_volumes/
+- volumes[*].amount -> >0
+- volumes[*].height -> >0.0
+- volumes[*].width -> >0.0
+- volumes[*].length -> >0.0
+- volumes[*].unitary_price -> >0.0
+- volumes[*].unitary_weight -> >0.0
+
