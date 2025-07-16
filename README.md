@@ -129,3 +129,63 @@ Cliente → [GET /metrics?last_quotes=100] → API → Validação → OK
 - volumes[*].unitary_price -> >0.0
 - volumes[*].unitary_weight -> >0.0
 
+
+-----
+
+## Schema do Clickhouse
+
+```sql
+-- particionar por mês do timestamp PODE ser uma boa
+-- mas para o momento não é preciso ^^
+CREATE TABLE quotes
+(
+    id UUID DEFAULT generateUUIDv7(),
+    name String,
+    service String,
+    deadline UInt8,
+    price Float64,
+    timestamp DateTime DEFAULT now()
+)
+ENGINE = MergeTree()
+ORDER BY (service, timestamp);
+```
+
+### Inserção de registros
+```sql
+-- timestamp pode ser omitido já que
+-- o registro será inserido no momento
+-- da requisição.
+insert into quotes (name, service, deadline, price)
+values (?, ?, ?, ?);
+```
+
+### Pesquisa de registros
+```sql
+-- LIMIT <n> pode ser usado para limitar
+-- é adicionado dinamicamente pelo servidor.
+-- Go não tem uma forma melhor de fazer isso
+-- sem mandar um `N ou MAX_INT`.
+WITH last_quotes AS (SELECT *
+                     FROM quotes
+                     ORDER BY timestamp DESC
+                     LIMIT -1)
+SELECT name       AS carrier,
+       count()    AS total_quotes,
+       sum(price) AS total_price,
+       avg(price) AS avg_price
+FROM last_quotes
+GROUP BY carrier
+ORDER BY carrier;
+
+-- LIMIT <n> pode ser usado para limitar
+-- é adicionado dinamicamente pelo servidor.
+-- Go não tem uma forma melhor de fazer isso
+-- sem mandar um `N ou MAX_INT`.
+WITH last_quotes AS (SELECT *
+                     FROM quotes
+                     ORDER BY timestamp DESC
+                     LIMIT -1)
+SELECT min(price) AS lowest_price,
+       max(price) AS highest_price
+FROM last_quotes;
+```
