@@ -16,9 +16,40 @@ func TestQuoteInvalidCategory(t *testing.T) {
 }
 
 func TestQuoteInvalidZipcode(t *testing.T) {
-	err := quotes.QuoteInvalidZipcode{
+	err := quotes.QuoteInvalidZipcodeError{
 		Message: "Invalid zipcode",
 	}
 
 	assert.Equal(t, "Invalid zipcode", err.Error())
+}
+func TestQuoteQuoteInvalidDimensionError(t *testing.T) {
+	err := quotes.QuoteInvalidDimensionError{
+		Message: "SUT",
+	}
+
+	assert.Equal(t, "SUT", err.Error())
+}
+
+func TestQuoteQuoteInvalidAmountError(t *testing.T) {
+	err := quotes.QuoteInvalidAmountError{
+		Message: "SUT",
+	}
+
+	assert.Equal(t, "SUT", err.Error())
+}
+
+func TestQuoteQuoteInvalidPriceError(t *testing.T) {
+	err := quotes.QuoteInvalidPriceError{
+		Message: "SUT",
+	}
+
+	assert.Equal(t, "SUT", err.Error())
+}
+
+func TestQuoteQuoteInvalidWeightError(t *testing.T) {
+	err := quotes.QuoteInvalidWeightError{
+		Message: "SUT",
+	}
+
+	assert.Equal(t, "SUT", err.Error())
 }

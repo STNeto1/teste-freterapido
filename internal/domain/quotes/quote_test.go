@@ -80,7 +80,7 @@ func TestRequestQuote_ParseRecipientZipcode(t *testing.T) {
 	invalidParsedZipcode, err := invalidQuote.ParseRecipientZipcode()
 	assert.Equal(t, int64(-1), invalidParsedZipcode)
 	assert.Error(t, err)
-	assert.ErrorIs(t, err, quotes.QuoteInvalidZipcode{Message: "Invalid recipient zipcode"})
+	assert.ErrorIs(t, err, quotes.QuoteInvalidZipcodeError{Message: "Invalid recipient zipcode"})
 }
 
 func TestRequestQuote_MustParseRecipientZipcode(t *testing.T) {

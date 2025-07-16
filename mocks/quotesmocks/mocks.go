@@ -2,11 +2,10 @@
 // github.com/vektra/mockery
 // template: testify
 
-package quotes_test
+package quotesmocks
 
 import (
 	"context"
-
 	"github.com/stneto1/teste-freterapido/internal/domain/quotes"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -39,25 +38,25 @@ func (_m *MockFreteRapidoQuotesRepository) EXPECT() *MockFreteRapidoQuotesReposi
 }
 
 // TryQuote provides a mock function for the type MockFreteRapidoQuotesRepository
-func (_mock *MockFreteRapidoQuotesRepository) TryQuote(context1 context.Context, requestQuote quotes.RequestQuote) (quotes.ResponseQuote, error) {
-	ret := _mock.Called(context1, requestQuote)
+func (_mock *MockFreteRapidoQuotesRepository) TryQuote(context1 context.Context, freteRapidoRequestQuote quotes.FreteRapidoRequestQuote) (quotes.FreteRapidoResponseQuote, error) {
+	ret := _mock.Called(context1, freteRapidoRequestQuote)
 
 	if len(ret) == 0 {
 		panic("no return value specified for TryQuote")
 	}
 
-	var r0 quotes.ResponseQuote
+	var r0 quotes.FreteRapidoResponseQuote
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, quotes.RequestQuote) (quotes.ResponseQuote, error)); ok {
-		return returnFunc(context1, requestQuote)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, quotes.FreteRapidoRequestQuote) (quotes.FreteRapidoResponseQuote, error)); ok {
+		return returnFunc(context1, freteRapidoRequestQuote)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, quotes.RequestQuote) quotes.ResponseQuote); ok {
-		r0 = returnFunc(context1, requestQuote)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, quotes.FreteRapidoRequestQuote) quotes.FreteRapidoResponseQuote); ok {
+		r0 = returnFunc(context1, freteRapidoRequestQuote)
 	} else {
-		r0 = ret.Get(0).(quotes.ResponseQuote)
+		r0 = ret.Get(0).(quotes.FreteRapidoResponseQuote)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, quotes.RequestQuote) error); ok {
-		r1 = returnFunc(context1, requestQuote)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, quotes.FreteRapidoRequestQuote) error); ok {
+		r1 = returnFunc(context1, freteRapidoRequestQuote)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -71,20 +70,20 @@ type MockFreteRapidoQuotesRepository_TryQuote_Call struct {
 
 // TryQuote is a helper method to define mock.On call
 //   - context1 context.Context
-//   - requestQuote quotes.RequestQuote
-func (_e *MockFreteRapidoQuotesRepository_Expecter) TryQuote(context1 interface{}, requestQuote interface{}) *MockFreteRapidoQuotesRepository_TryQuote_Call {
-	return &MockFreteRapidoQuotesRepository_TryQuote_Call{Call: _e.mock.On("TryQuote", context1, requestQuote)}
+//   - freteRapidoRequestQuote quotes.FreteRapidoRequestQuote
+func (_e *MockFreteRapidoQuotesRepository_Expecter) TryQuote(context1 interface{}, freteRapidoRequestQuote interface{}) *MockFreteRapidoQuotesRepository_TryQuote_Call {
+	return &MockFreteRapidoQuotesRepository_TryQuote_Call{Call: _e.mock.On("TryQuote", context1, freteRapidoRequestQuote)}
 }
 
-func (_c *MockFreteRapidoQuotesRepository_TryQuote_Call) Run(run func(context1 context.Context, requestQuote quotes.RequestQuote)) *MockFreteRapidoQuotesRepository_TryQuote_Call {
+func (_c *MockFreteRapidoQuotesRepository_TryQuote_Call) Run(run func(context1 context.Context, freteRapidoRequestQuote quotes.FreteRapidoRequestQuote)) *MockFreteRapidoQuotesRepository_TryQuote_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 quotes.RequestQuote
+		var arg1 quotes.FreteRapidoRequestQuote
 		if args[1] != nil {
-			arg1 = args[1].(quotes.RequestQuote)
+			arg1 = args[1].(quotes.FreteRapidoRequestQuote)
 		}
 		run(
 			arg0,
@@ -94,12 +93,12 @@ func (_c *MockFreteRapidoQuotesRepository_TryQuote_Call) Run(run func(context1 c
 	return _c
 }
 
-func (_c *MockFreteRapidoQuotesRepository_TryQuote_Call) Return(responseQuote quotes.ResponseQuote, err error) *MockFreteRapidoQuotesRepository_TryQuote_Call {
-	_c.Call.Return(responseQuote, err)
+func (_c *MockFreteRapidoQuotesRepository_TryQuote_Call) Return(freteRapidoResponseQuote quotes.FreteRapidoResponseQuote, err error) *MockFreteRapidoQuotesRepository_TryQuote_Call {
+	_c.Call.Return(freteRapidoResponseQuote, err)
 	return _c
 }
 
-func (_c *MockFreteRapidoQuotesRepository_TryQuote_Call) RunAndReturn(run func(context1 context.Context, requestQuote quotes.RequestQuote) (quotes.ResponseQuote, error)) *MockFreteRapidoQuotesRepository_TryQuote_Call {
+func (_c *MockFreteRapidoQuotesRepository_TryQuote_Call) RunAndReturn(run func(context1 context.Context, freteRapidoRequestQuote quotes.FreteRapidoRequestQuote) (quotes.FreteRapidoResponseQuote, error)) *MockFreteRapidoQuotesRepository_TryQuote_Call {
 	_c.Call.Return(run)
 	return _c
 }

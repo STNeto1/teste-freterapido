@@ -275,7 +275,7 @@ func (req RequestQuote) MustParseRecipientZipcode() int64 {
 func (req RequestQuote) ParseRecipientZipcode() (int64, error) {
 	value := req.MustParseRecipientZipcode()
 	if value == -1 {
-		return -1, QuoteInvalidZipcode{
+		return -1, QuoteInvalidZipcodeError{
 			Message: "Invalid recipient zipcode",
 		}
 	}
