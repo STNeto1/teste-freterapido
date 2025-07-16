@@ -143,7 +143,7 @@ CREATE TABLE quotes
     name String,
     service String,
     deadline UInt8,
-    price Float64,
+    price Decimal(10, 2),
     timestamp DateTime DEFAULT now()
 )
 ENGINE = MergeTree()
