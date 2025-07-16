@@ -1,6 +1,7 @@
 package quotes
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// SOURCE: https://dev.freterapido.com.br/common/tipos_de_volumes/
+// CategoryMap -> SOURCE: https://dev.freterapido.com.br/common/tipos_de_volumes/
 var CategoryMap = map[int]string{
 	1:   "Abrasivos",
 	2:   "Adubos / Fertilizantes",
@@ -206,59 +207,38 @@ type RequestQuote struct {
 	Volumes []RequestQuoteVolume `json:"volumes"`
 }
 
-// ValidateCategories returns first invalid category index, -1 if all are valid
-func (req RequestQuote) ValidateCategories() int {
+// ErrorSet returns all errors based on validations, nil if no errors
+func (req RequestQuote) ErrorSet() []string {
+	var errors []string
+
+	_, err := req.ParseRecipientZipcode()
+	if err != nil {
+		errors = append(errors, err.Error())
+	}
+
 	for idx, vol := range req.Volumes {
 		if _, ok := CategoryMap[vol.Category]; !ok {
-			return idx
+			errors = append(errors, fmt.Sprintf("Category on volume %d is invalid", idx+1))
 		}
-	}
 
-	return -1
-}
-
-// ValidateDimensions returns first volume index, -1 if all are valid
-func (req RequestQuote) ValidateDimensions() int {
-	for idx, vol := range req.Volumes {
 		if vol.Height <= 0 || vol.Width <= 0 || vol.Length <= 0 {
-			return idx
+			errors = append(errors, fmt.Sprintf("Dimensions on volume %d are invalid", idx+1))
 		}
-	}
 
-	return -1
-}
-
-// ValidateAmount returns first volume index, -1 if all are valid
-func (req RequestQuote) ValidateAmount() int {
-	for idx, vol := range req.Volumes {
-		if vol.Amount <= 0 {
-			return idx
-		}
-	}
-
-	return -1
-}
-
-// ValidatePrice returns first volume index, -1 if all are valid
-func (req RequestQuote) ValidatePrice() int {
-	for idx, vol := range req.Volumes {
 		if vol.Price.IsZero() || vol.Price.IsNegative() {
-			return idx
+			errors = append(errors, fmt.Sprintf("Price on volume %d is invalid", idx+1))
 		}
-	}
 
-	return -1
-}
-
-// ValidateWeight returns first volume index, -1 if all are valid
-func (req RequestQuote) ValidateWeight() int {
-	for idx, vol := range req.Volumes {
 		if vol.UnitaryWeight <= 0 {
-			return idx
+			errors = append(errors, fmt.Sprintf("Weight on volume %d is invalid", idx+1))
+		}
+
+		if vol.Amount <= 0 {
+			errors = append(errors, fmt.Sprintf("Amount on volume %d is invalid", idx+1))
 		}
 	}
 
-	return -1
+	return errors
 }
 
 // MustParseRecipientZipcode returns parsed recipient zipcode or -1 if invalid

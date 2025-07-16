@@ -90,7 +90,7 @@ func TestQuoteService_CreateRequestPayload(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
-func TestQuoteService_GetFreteRapidoQuotes_InvalidZipcode(t *testing.T) {
+func TestQuoteService_GetFreteRapidoQuotes_InvalidPayload(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
@@ -102,182 +102,36 @@ func TestQuoteService_GetFreteRapidoQuotes_InvalidZipcode(t *testing.T) {
 
 	quote := quotes.RequestQuote{
 		Recipient: quotes.RequestQuoteRecipient{
-			Address: quotes.RequestQuoteRecipientAddress{
-				Zipcode: "abc",
-			},
-		},
-		Volumes: []quotes.RequestQuoteVolume{},
-	}
-
-	result, err := svc.GetFreteRapidoQuotes(t.Context(), &quote)
-	assert.Nil(t, result)
-	assert.Equal(t, err, quotes.QuoteInvalidZipcodeError{
-		Message: "Invalid recipient zipcode",
-	})
-}
-
-func TestQuoteService_GetFreteRapidoQuotes_InvalidCategory(t *testing.T) {
-	t.Parallel()
-
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
-
-	svc := quotes.NewQuoteService(freteRapidoMock)
-
-	quote := quotes.RequestQuote{
-		Recipient: quotes.RequestQuoteRecipient{
-			Address: quotes.RequestQuoteRecipientAddress{
-				Zipcode: "123",
-			},
+			Address: quotes.RequestQuoteRecipientAddress{},
 		},
 		Volumes: []quotes.RequestQuoteVolume{
 			{
-				Category: 0,
+				Category:      0,
+				Amount:        0,
+				Width:         0,
+				Height:        0,
+				Length:        0,
+				Price:         decimal.NewFromFloat(0),
+				UnitaryWeight: 0,
 			},
 		},
 	}
 
 	result, err := svc.GetFreteRapidoQuotes(t.Context(), &quote)
 	assert.Nil(t, result)
-	assert.Equal(t, err, quotes.QuoteInvalidCategoryError{
-		Message: "Category on volume 1 is invalid",
+	assert.Equal(t, err, quotes.QuoteRequestErrorSetError{
+		Errors: []string{
+			"Invalid recipient zipcode",
+			"Category on volume 1 is invalid",
+			"Dimensions on volume 1 are invalid",
+			"Price on volume 1 is invalid",
+			"Weight on volume 1 is invalid",
+			"Amount on volume 1 is invalid",
+		},
 	})
 }
 
-func TestQuoteService_GetFreteRapidoQuotes_InvalidAmount(t *testing.T) {
-	t.Parallel()
-
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
-
-	svc := quotes.NewQuoteService(freteRapidoMock)
-
-	quote := quotes.RequestQuote{
-		Recipient: quotes.RequestQuoteRecipient{
-			Address: quotes.RequestQuoteRecipientAddress{
-				Zipcode: "123",
-			},
-		},
-		Volumes: []quotes.RequestQuoteVolume{
-			{
-				Category: 1,
-				Amount:   0,
-			},
-		},
-	}
-
-	result, err := svc.GetFreteRapidoQuotes(t.Context(), &quote)
-	assert.Nil(t, result)
-	assert.Equal(t, err, quotes.QuoteInvalidAmountError{
-		Message: "Amount on volume 1 is invalid",
-	})
-}
-
-func TestQuoteService_GetFreteRapidoQuotes_InvalidDimensions(t *testing.T) {
-	t.Parallel()
-
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
-
-	svc := quotes.NewQuoteService(freteRapidoMock)
-
-	quote := quotes.RequestQuote{
-		Recipient: quotes.RequestQuoteRecipient{
-			Address: quotes.RequestQuoteRecipientAddress{
-				Zipcode: "123",
-			},
-		},
-		Volumes: []quotes.RequestQuoteVolume{
-			{
-				Category: 1,
-				Amount:   1,
-			},
-		},
-	}
-
-	result, err := svc.GetFreteRapidoQuotes(t.Context(), &quote)
-	assert.Nil(t, result)
-	assert.Equal(t, err, quotes.QuoteInvalidDimensionError{
-		Message: "Dimensions on volume 1 are invalid",
-	})
-}
-
-func TestQuoteService_GetFreteRapidoQuotes_InvalidPrices(t *testing.T) {
-	t.Parallel()
-
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
-
-	svc := quotes.NewQuoteService(freteRapidoMock)
-
-	quote := quotes.RequestQuote{
-		Recipient: quotes.RequestQuoteRecipient{
-			Address: quotes.RequestQuoteRecipientAddress{
-				Zipcode: "123",
-			},
-		},
-		Volumes: []quotes.RequestQuoteVolume{
-			{
-				Category: 1,
-				Amount:   1,
-				Width:    1,
-				Height:   1,
-				Length:   1,
-			},
-		},
-	}
-
-	result, err := svc.GetFreteRapidoQuotes(t.Context(), &quote)
-	assert.Nil(t, result)
-	assert.Equal(t, err, quotes.QuoteInvalidPriceError{
-		Message: "Price on volume 1 is invalid",
-	})
-}
-
-func TestQuoteService_GetFreteRapidoQuotes_InvalidWeights(t *testing.T) {
-	t.Parallel()
-
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
-
-	svc := quotes.NewQuoteService(freteRapidoMock)
-
-	quote := quotes.RequestQuote{
-		Recipient: quotes.RequestQuoteRecipient{
-			Address: quotes.RequestQuoteRecipientAddress{
-				Zipcode: "123",
-			},
-		},
-		Volumes: []quotes.RequestQuoteVolume{
-			{
-				Category: 1,
-				Amount:   1,
-				Width:    1,
-				Height:   1,
-				Length:   1,
-				Price:    decimal.NewFromFloat(1),
-			},
-		},
-	}
-
-	result, err := svc.GetFreteRapidoQuotes(t.Context(), &quote)
-	assert.Nil(t, result)
-	assert.Equal(t, err, quotes.QuoteInvalidWeightError{
-		Message: "Weight on volume 1 is invalid",
-	})
-}
-
-func TestQuoteService_GetFreteRapidoQuotes_NoValidationError(t *testing.T) {
+func TestQuoteService_GetFreteRapidoQuotes_SuccessfulValidation(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)

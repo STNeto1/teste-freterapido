@@ -69,39 +69,10 @@ func (s *QuoteService) CreateRequestPayload(requestQuote *RequestQuote) FreteRap
 }
 
 func (s *QuoteService) GetFreteRapidoQuotes(ctx context.Context, req *RequestQuote) ([]Quote, error) {
-	if _, err := req.ParseRecipientZipcode(); err != nil {
-		return nil, QuoteInvalidZipcodeError{
-			Message: "Invalid recipient zipcode",
-		}
-	}
-
-	if invalidIdx := req.ValidateCategories(); invalidIdx != -1 {
-		return nil, QuoteInvalidCategoryError{
-			Message: fmt.Sprintf("Category on volume %d is invalid", invalidIdx+1),
-		}
-	}
-
-	if invalidIdx := req.ValidateAmount(); invalidIdx != -1 {
-		return nil, QuoteInvalidAmountError{
-			Message: fmt.Sprintf("Amount on volume %d is invalid", invalidIdx+1),
-		}
-	}
-
-	if invalidIdx := req.ValidateDimensions(); invalidIdx != -1 {
-		return nil, QuoteInvalidDimensionError{
-			Message: fmt.Sprintf("Dimensions on volume %d are invalid", invalidIdx+1),
-		}
-	}
-
-	if invalidIdx := req.ValidatePrice(); invalidIdx != -1 {
-		return nil, QuoteInvalidPriceError{
-			Message: fmt.Sprintf("Price on volume %d is invalid", invalidIdx+1),
-		}
-	}
-
-	if invalidIdx := req.ValidateWeight(); invalidIdx != -1 {
-		return nil, QuoteInvalidWeightError{
-			Message: fmt.Sprintf("Weight on volume %d is invalid", invalidIdx+1),
+	errorSet := req.ErrorSet()
+	if errorSet != nil {
+		return nil, QuoteRequestErrorSetError{
+			Errors: errorSet,
 		}
 	}
 

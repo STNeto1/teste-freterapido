@@ -1,10 +1,10 @@
 package quotes
 
-type QuoteInvalidCategoryError struct {
+type QuoteRequestError struct {
 	Message string
 }
 
-func (q QuoteInvalidCategoryError) Error() string {
+func (q QuoteRequestError) Error() string {
 	return q.Message
 }
 
@@ -16,42 +16,12 @@ func (q QuoteInvalidZipcodeError) Error() string {
 	return q.Message
 }
 
-type QuoteInvalidDimensionError struct {
-	Message string
+type QuoteRequestErrorSetError struct {
+	Errors []string
 }
 
-func (q QuoteInvalidDimensionError) Error() string {
-	return q.Message
-}
-
-type QuoteInvalidAmountError struct {
-	Message string
-}
-
-func (q QuoteInvalidAmountError) Error() string {
-	return q.Message
-}
-
-type QuoteInvalidPriceError struct {
-	Message string
-}
-
-func (q QuoteInvalidPriceError) Error() string {
-	return q.Message
-}
-
-type QuoteInvalidWeightError struct {
-	Message string
-}
-
-func (q QuoteInvalidWeightError) Error() string {
-	return q.Message
-}
-
-type QuoteRequestError struct {
-	Message string
-}
-
-func (q QuoteRequestError) Error() string {
-	return q.Message
+// Error implements the error interface
+// Not for public use (as a serializable error)
+func (q QuoteRequestErrorSetError) Error() string {
+	return "<SHOULD_NEVER_LEAVE_SYSTEM>"
 }

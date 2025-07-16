@@ -5,7 +5,6 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/stneto1/teste-freterapido/internal/domain/quotes"
-	"github.com/stneto1/teste-freterapido/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,40 +13,50 @@ func TestQuote_ValidateCategories(t *testing.T) {
 
 	for categoryID := range quotes.CategoryMap {
 		quote := quotes.RequestQuote{
-			Recipient: quotes.RequestQuoteRecipient{},
+			Recipient: quotes.RequestQuoteRecipient{
+				Address: quotes.RequestQuoteRecipientAddress{
+					Zipcode: "123",
+				},
+			},
 			Volumes: []quotes.RequestQuoteVolume{
 				{
 					Category:      categoryID,
-					Amount:        0,
-					UnitaryWeight: 0,
-					Price:         decimal.NewFromFloat(0),
-					Sku:           "",
-					Height:        0,
-					Width:         0,
-					Length:        0,
+					Amount:        1,
+					UnitaryWeight: 1,
+					Price:         decimal.NewFromFloat(1),
+					Sku:           "SUT",
+					Height:        1,
+					Width:         1,
+					Length:        1,
 				},
 			},
 		}
 
-		assert.Equal(t, -1, quote.ValidateCategories())
+		assert.Nil(t, quote.ErrorSet())
 	}
 
 	invalidQuote := quotes.RequestQuote{
-		Recipient: quotes.RequestQuoteRecipient{},
+		Recipient: quotes.RequestQuoteRecipient{
+			Address: quotes.RequestQuoteRecipientAddress{
+				Zipcode: "123",
+			},
+		},
 		Volumes: []quotes.RequestQuoteVolume{
 			{
 				Category:      9999,
-				Amount:        0,
-				UnitaryWeight: 0,
-				Price:         decimal.NewFromFloat(0),
+				Amount:        1,
+				UnitaryWeight: 1,
+				Price:         decimal.NewFromFloat(1),
 				Sku:           "",
-				Height:        0,
-				Width:         0,
-				Length:        0,
+				Height:        1,
+				Width:         1,
+				Length:        1,
 			},
 		},
 	}
-	assert.Equal(t, 0, invalidQuote.ValidateCategories())
+	assert.Equal(t, []string{
+		"Category on volume 1 is invalid",
+	}, invalidQuote.ErrorSet())
 }
 
 func TestRequestQuote_ParseRecipientZipcode(t *testing.T) {
@@ -113,176 +122,49 @@ func TestRequestQuote_MustParseRecipientZipcode(t *testing.T) {
 	assert.Equal(t, int64(-1), invalidParsedZipcode)
 }
 
-func TestRequestQuote_ValidateDimensions(t *testing.T) {
+func TestQuote_ErrorSetFullyInvalid(t *testing.T) {
 	t.Parallel()
 
-	dimensions := utils.Map(utils.RangeWithStep(-1, 1, 1), func(val int) float64 {
-		return float64(val)
-	})
-
-	for _, heightDimension := range dimensions {
-		sample := quotes.RequestQuote{
-			Recipient: quotes.RequestQuoteRecipient{},
-			Volumes: []quotes.RequestQuoteVolume{
-				{
-					Category:      0,
-					Amount:        0,
-					UnitaryWeight: 0,
-					Price:         decimal.NewFromFloat(0),
-					Sku:           "",
-					Height:        heightDimension,
-					Width:         10,
-					Length:        10,
-				},
-			},
-		}
-
-		if heightDimension > 0 {
-			assert.Equal(t, -1, sample.ValidateDimensions())
-		} else {
-			assert.Equal(t, 0, sample.ValidateDimensions())
-		}
+	invalidQuote := quotes.RequestQuote{
+		Recipient: quotes.RequestQuoteRecipient{
+			Address: quotes.RequestQuoteRecipientAddress{},
+		},
+		Volumes: []quotes.RequestQuoteVolume{
+			{},
+		},
 	}
-
-	for _, widthDimension := range dimensions {
-		sample := quotes.RequestQuote{
-			Recipient: quotes.RequestQuoteRecipient{},
-			Volumes: []quotes.RequestQuoteVolume{
-				{
-					Category:      0,
-					Amount:        0,
-					UnitaryWeight: 0,
-					Price:         decimal.NewFromFloat(0),
-					Sku:           "",
-					Height:        10,
-					Width:         widthDimension,
-					Length:        10,
-				},
-			},
-		}
-
-		if widthDimension > 0 {
-			assert.Equal(t, -1, sample.ValidateDimensions())
-		} else {
-			assert.Equal(t, 0, sample.ValidateDimensions())
-		}
-	}
-
-	for _, lengthDimension := range dimensions {
-		sample := quotes.RequestQuote{
-			Recipient: quotes.RequestQuoteRecipient{},
-			Volumes: []quotes.RequestQuoteVolume{
-				{
-					Category:      0,
-					Amount:        0,
-					UnitaryWeight: 0,
-					Price:         decimal.NewFromFloat(0),
-					Sku:           "",
-					Height:        10,
-					Width:         10,
-					Length:        lengthDimension,
-				},
-			},
-		}
-
-		if lengthDimension > 0 {
-			assert.Equal(t, -1, sample.ValidateDimensions())
-		} else {
-			assert.Equal(t, 0, sample.ValidateDimensions())
-		}
-	}
+	validationErrors := invalidQuote.ErrorSet()
+	assert.Equal(t, []string{
+		"Invalid recipient zipcode",
+		"Category on volume 1 is invalid",
+		"Dimensions on volume 1 are invalid",
+		"Price on volume 1 is invalid",
+		"Weight on volume 1 is invalid",
+		"Amount on volume 1 is invalid",
+	}, validationErrors)
 }
 
-func TestRequestQuote_ValidateAmount(t *testing.T) {
+func TestQuote_ErrorSetFullyWithoutErrors(t *testing.T) {
 	t.Parallel()
 
-	amounts := utils.RangeWithStep(-1, 1, 1)
-
-	for _, amount := range amounts {
-		sample := quotes.RequestQuote{
-			Recipient: quotes.RequestQuoteRecipient{},
-			Volumes: []quotes.RequestQuoteVolume{
-				{
-					Category:      0,
-					Amount:        amount,
-					UnitaryWeight: 0,
-					Price:         decimal.NewFromFloat(0),
-					Sku:           "",
-					Height:        0,
-					Width:         0,
-					Length:        0,
-				},
+	invalidQuote := quotes.RequestQuote{
+		Recipient: quotes.RequestQuoteRecipient{
+			Address: quotes.RequestQuoteRecipientAddress{
+				Zipcode: "123",
 			},
-		}
-
-		if amount > 0 {
-			assert.Equal(t, -1, sample.ValidateAmount())
-		} else {
-			assert.Equal(t, 0, sample.ValidateAmount())
-		}
-	}
-}
-
-func TestRequestQuote_ValidatePrice(t *testing.T) {
-	t.Parallel()
-
-	prices := utils.Map(utils.RangeWithStep(-1, 1, 1), func(val int) decimal.Decimal {
-		return decimal.NewFromInt(int64(val))
-	})
-
-	for _, price := range prices {
-		sample := quotes.RequestQuote{
-			Recipient: quotes.RequestQuoteRecipient{},
-			Volumes: []quotes.RequestQuoteVolume{
-				{
-					Category:      0,
-					Amount:        0,
-					UnitaryWeight: 0,
-					Price:         price,
-					Sku:           "",
-					Height:        0,
-					Width:         0,
-					Length:        0,
-				},
+		},
+		Volumes: []quotes.RequestQuoteVolume{
+			{
+				Category:      1,
+				Amount:        1,
+				Width:         1,
+				Height:        1,
+				Length:        1,
+				Price:         decimal.NewFromFloat(1),
+				UnitaryWeight: 1,
 			},
-		}
-
-		if price.IsPositive() {
-			assert.Equal(t, -1, sample.ValidatePrice())
-		} else {
-			assert.Equal(t, 0, sample.ValidatePrice())
-		}
+		},
 	}
-}
-
-func TestRequestQuote_ValidateWeight(t *testing.T) {
-	t.Parallel()
-
-	weights := utils.Map(utils.RangeWithStep(-1, 1, 1), func(val int) float64 {
-		return float64(val)
-	})
-
-	for _, weight := range weights {
-		sample := quotes.RequestQuote{
-			Recipient: quotes.RequestQuoteRecipient{},
-			Volumes: []quotes.RequestQuoteVolume{
-				{
-					Category:      0,
-					Amount:        0,
-					UnitaryWeight: weight,
-					Price:         decimal.NewFromFloat(0),
-					Sku:           "",
-					Height:        0,
-					Width:         0,
-					Length:        0,
-				},
-			},
-		}
-
-		if weight > 0 {
-			assert.Equal(t, -1, sample.ValidateWeight())
-		} else {
-			assert.Equal(t, 0, sample.ValidateWeight())
-		}
-	}
+	validationErrors := invalidQuote.ErrorSet()
+	assert.Nil(t, validationErrors)
 }
