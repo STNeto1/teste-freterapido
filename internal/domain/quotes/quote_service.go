@@ -3,7 +3,9 @@ package quotes
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/stneto1/teste-freterapido/internal/utils"
 )
 
@@ -103,5 +105,30 @@ func (s *QuoteService) GetFreteRapidoQuotes(ctx context.Context, req *RequestQuo
 		}
 	}
 
-	return nil, nil
+	// TODO: make retries
+	result, err := s.freteRapidoRepository.TryQuote(ctx, s.CreateRequestPayload(req))
+	if err != nil {
+		return nil, QuoteRequestError{
+			Message: err.Error(),
+		}
+	}
+
+	var quotes []Quote
+	for _, dispatcher := range result.Dispatchers {
+		for _, offer := range dispatcher.Offers {
+			quotes = append(quotes, Quote{
+				ID:        uuid.Must(uuid.NewV7()),
+				Name:      offer.Carrier.Name,
+				Service:   offer.Service,
+				Deadline:  uint8(offer.DeliveryTime.Days),
+				Price:     offer.FinalPrice,
+				CreatedAt: time.Now(),
+			})
+		}
+	}
+
+	// TODO: maybe handle no quote on response?
+	// TODO: send to analytics
+
+	return quotes, nil
 }

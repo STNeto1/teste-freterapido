@@ -53,3 +53,11 @@ func TestQuoteQuoteInvalidWeightError(t *testing.T) {
 
 	assert.Equal(t, "SUT", err.Error())
 }
+
+func TestQuoteRequestError(t *testing.T) {
+	err := quotes.QuoteRequestError{
+		Message: "SUT",
+	}
+
+	assert.Equal(t, "SUT", err.Error())
+}

@@ -1,18 +1,25 @@
 package quotes_test
 
 import (
+	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/shopspring/decimal"
 	"github.com/stneto1/teste-freterapido/internal/domain/quotes"
 	"github.com/stneto1/teste-freterapido/mocks/quotesmocks"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestQuoteService_CreateRequestPayload(t *testing.T) {
 	t.Parallel()
 
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(t)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
 
 	svc := quotes.NewQuoteService(freteRapidoMock)
 
@@ -86,7 +93,10 @@ func TestQuoteService_CreateRequestPayload(t *testing.T) {
 func TestQuoteService_GetFreteRapidoQuotes_InvalidZipcode(t *testing.T) {
 	t.Parallel()
 
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(t)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
 
 	svc := quotes.NewQuoteService(freteRapidoMock)
 
@@ -109,7 +119,10 @@ func TestQuoteService_GetFreteRapidoQuotes_InvalidZipcode(t *testing.T) {
 func TestQuoteService_GetFreteRapidoQuotes_InvalidCategory(t *testing.T) {
 	t.Parallel()
 
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(t)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
 
 	svc := quotes.NewQuoteService(freteRapidoMock)
 
@@ -136,7 +149,10 @@ func TestQuoteService_GetFreteRapidoQuotes_InvalidCategory(t *testing.T) {
 func TestQuoteService_GetFreteRapidoQuotes_InvalidAmount(t *testing.T) {
 	t.Parallel()
 
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(t)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
 
 	svc := quotes.NewQuoteService(freteRapidoMock)
 
@@ -164,7 +180,10 @@ func TestQuoteService_GetFreteRapidoQuotes_InvalidAmount(t *testing.T) {
 func TestQuoteService_GetFreteRapidoQuotes_InvalidDimensions(t *testing.T) {
 	t.Parallel()
 
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(t)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
 
 	svc := quotes.NewQuoteService(freteRapidoMock)
 
@@ -192,7 +211,10 @@ func TestQuoteService_GetFreteRapidoQuotes_InvalidDimensions(t *testing.T) {
 func TestQuoteService_GetFreteRapidoQuotes_InvalidPrices(t *testing.T) {
 	t.Parallel()
 
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(t)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
 
 	svc := quotes.NewQuoteService(freteRapidoMock)
 
@@ -223,7 +245,10 @@ func TestQuoteService_GetFreteRapidoQuotes_InvalidPrices(t *testing.T) {
 func TestQuoteService_GetFreteRapidoQuotes_InvalidWeights(t *testing.T) {
 	t.Parallel()
 
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(t)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
 
 	svc := quotes.NewQuoteService(freteRapidoMock)
 
@@ -255,7 +280,16 @@ func TestQuoteService_GetFreteRapidoQuotes_InvalidWeights(t *testing.T) {
 func TestQuoteService_GetFreteRapidoQuotes_NoValidationError(t *testing.T) {
 	t.Parallel()
 
-	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(t)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
+	freteRapidoMock.
+		EXPECT().
+		TryQuote(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ quotes.FreteRapidoRequestQuote) (quotes.FreteRapidoResponseQuote, error) {
+			return quotes.FreteRapidoResponseQuote{}, nil
+		}).AnyTimes()
 
 	svc := quotes.NewQuoteService(freteRapidoMock)
 
@@ -284,4 +318,132 @@ func TestQuoteService_GetFreteRapidoQuotes_NoValidationError(t *testing.T) {
 	// assert.Equal(t, err, quotes.QuoteInvalidWeightError{
 	// 	Message: "Weight on volume 1 is invalid",
 	// })
+}
+
+func TestQuoteService_GetFreteRapidoQuotes_TryQuotesFailure(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
+	freteRapidoMock.
+		EXPECT().
+		TryQuote(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ quotes.FreteRapidoRequestQuote) (quotes.FreteRapidoResponseQuote, error) {
+			return quotes.FreteRapidoResponseQuote{}, fmt.Errorf("error")
+		}).AnyTimes()
+
+	svc := quotes.NewQuoteService(freteRapidoMock)
+
+	quote := quotes.RequestQuote{
+		Recipient: quotes.RequestQuoteRecipient{
+			Address: quotes.RequestQuoteRecipientAddress{
+				Zipcode: "123",
+			},
+		},
+		Volumes: []quotes.RequestQuoteVolume{
+			{
+				Category:      1,
+				Amount:        1,
+				Width:         1,
+				Height:        1,
+				Length:        1,
+				Price:         decimal.NewFromFloat(1),
+				UnitaryWeight: 1,
+			},
+		},
+	}
+
+	resultQuotes, err := svc.GetFreteRapidoQuotes(t.Context(), &quote)
+	assert.Nil(t, resultQuotes)
+	assert.ErrorIs(t, err, quotes.QuoteRequestError{
+		Message: "error",
+	})
+}
+
+func TestQuoteService_GetFreteRapidoQuotes_TryQuotesValidReturn(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
+	freteRapidoMock.
+		EXPECT().
+		TryQuote(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ quotes.FreteRapidoRequestQuote) (quotes.FreteRapidoResponseQuote, error) {
+			return quotes.FreteRapidoResponseQuote{
+				Dispatchers: []quotes.FreteRapidoResponseDispatcher{
+					{
+						ID:                         "SUT",
+						FreteRapidoRequestID:       "SUT",
+						RegisteredNumberShipper:    "SUT",
+						RegisteredNumberDispatcher: "SUT",
+						ZipcodeOrigin:              0,
+						Offers: []quotes.FreteRapidoResponseOffer{
+							{
+								Offer:          1,
+								TableReference: "SUT",
+								SimulationType: 0,
+								Carrier: quotes.FreteRapidoResponseCarrier{
+									Name:             "SUT",
+									RegisteredNumber: "SUT",
+									StateInscription: "SUT",
+									Logo:             "SUT",
+									Reference:        0,
+									CompanyName:      "SUT",
+								},
+								Service:            "SUT",
+								ServiceCode:        "SUT",
+								ServiceDescription: "SUT",
+								DeliveryTime: quotes.FreteRapidoResponseDeliveryTime{
+									Days:          1,
+									Hours:         1,
+									Minutes:       1,
+									EstimatedDate: "SUT",
+								},
+								Expiration:                  time.Now(),
+								CostPrice:                   decimal.NewFromFloat(10),
+								FinalPrice:                  decimal.NewFromFloat(10),
+								Weights:                     quotes.FreteRapidoResponseWeights{},
+								Correios:                    &quotes.FreteRapidoResponseCorreios{},
+								OriginalDeliveryTime:        quotes.FreteRapidoResponseDeliveryTime{},
+								Identifier:                  "SUT",
+								HomeDelivery:                false,
+								CarrierOriginalDeliveryTime: quotes.FreteRapidoResponseDeliveryTime{},
+								Modal:                       "SUT",
+							},
+						},
+						TotalPrice: decimal.NewFromFloat(10),
+					},
+				},
+			}, nil
+		}).AnyTimes()
+
+	svc := quotes.NewQuoteService(freteRapidoMock)
+
+	quote := quotes.RequestQuote{
+		Recipient: quotes.RequestQuoteRecipient{
+			Address: quotes.RequestQuoteRecipientAddress{
+				Zipcode: "123",
+			},
+		},
+		Volumes: []quotes.RequestQuoteVolume{
+			{
+				Category:      1,
+				Amount:        1,
+				Width:         1,
+				Height:        1,
+				Length:        1,
+				Price:         decimal.NewFromFloat(1),
+				UnitaryWeight: 1,
+			},
+		},
+	}
+
+	resultQuotes, err := svc.GetFreteRapidoQuotes(t.Context(), &quote)
+	assert.NotNil(t, resultQuotes)
+	assert.Len(t, resultQuotes, 1)
+	assert.NoError(t, err)
 }

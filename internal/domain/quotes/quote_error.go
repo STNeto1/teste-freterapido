@@ -47,3 +47,11 @@ type QuoteInvalidWeightError struct {
 func (q QuoteInvalidWeightError) Error() string {
 	return q.Message
 }
+
+type QuoteRequestError struct {
+	Message string
+}
+
+func (q QuoteRequestError) Error() string {
+	return q.Message
+}
