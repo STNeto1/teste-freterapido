@@ -193,6 +193,36 @@ func TestRequestQuote_ValidateDimensions(t *testing.T) {
 	}
 }
 
+func TestRequestQuote_ValidateAmount(t *testing.T) {
+	t.Parallel()
+
+	amounts := utils.RangeWithStep(-1, 1, 1)
+
+	for _, amount := range amounts {
+		sample := quotes.RequestQuote{
+			Recipient: quotes.RequestQuoteRecipient{},
+			Volumes: []quotes.RequestQuoteVolume{
+				{
+					Category:      0,
+					Amount:        amount,
+					UnitaryWeight: 0,
+					Price:         decimal.NewFromFloat(0),
+					Sku:           "",
+					Height:        0,
+					Width:         0,
+					Length:        0,
+				},
+			},
+		}
+
+		if amount > 0 {
+			assert.Equal(t, -1, sample.ValidateAmount())
+		} else {
+			assert.Equal(t, 0, sample.ValidateAmount())
+		}
+	}
+}
+
 func TestRequestQuote_ValidatePrice(t *testing.T) {
 	t.Parallel()
 

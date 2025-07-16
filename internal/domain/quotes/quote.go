@@ -228,6 +228,17 @@ func (req RequestQuote) ValidateDimensions() int {
 	return -1
 }
 
+// ValidateAmount returns first volume index, -1 if all are valid
+func (req RequestQuote) ValidateAmount() int {
+	for idx, vol := range req.Volumes {
+		if vol.Amount <= 0 {
+			return idx
+		}
+	}
+
+	return -1
+}
+
 // ValidatePrice returns first volume index, -1 if all are valid
 func (req RequestQuote) ValidatePrice() int {
 	for idx, vol := range req.Volumes {
