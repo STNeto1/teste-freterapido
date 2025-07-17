@@ -3,6 +3,7 @@ package quotes
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -106,21 +107,25 @@ func (s *QuoteService) GetFreteRapidoQuotes(ctx context.Context, req *RequestQuo
 	}
 
 	// TODO: maybe handle no quote on response?
-	// go s.ProcessQuotes(ctx, quotes)
+	go s.ProcessQuotes(ctx, quotes)
 
 	return quotes, nil
 }
 
 // ProcessQuotes saves quotes to clickhouse, doesn't return anything because it's async
 func (s *QuoteService) ProcessQuotes(ctx context.Context, quotes []Quote) {
+	slog.Info("processing quotes")
+
 	if len(quotes) == 0 {
-		// TODO: log
+		slog.Error("no quotes to save")
 		return
 	}
 
 	// TODO: handle retries
 	if err := s.clickhouseRepository.AddQuotes(ctx, quotes); err != nil {
-		// TODO: log
+		slog.Error("failed to save quotes to clickhouse",
+			slog.Any("error", err),
+		)
 		return
 	}
 }
