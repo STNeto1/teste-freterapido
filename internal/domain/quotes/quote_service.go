@@ -45,7 +45,6 @@ func (s *QuoteService) CreateRequestPayload(requestQuote *RequestQuote) FreteRap
 			{
 				RegisteredNumber: s.config.RegisteredNumber,
 				Zipcode:          s.config.DispatcherZipCode,
-				// TotalPrice:       0, // TODO: reduce from volumes?
 				Volumes: utils.Map(requestQuote.Volumes, func(vol RequestQuoteVolume) FreteRapidoRequestVolumes {
 					return FreteRapidoRequestVolumes{
 						Amount: vol.Amount,
