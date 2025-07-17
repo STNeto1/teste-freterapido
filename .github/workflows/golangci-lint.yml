@@ -1,13 +1,17 @@
 name: golangci-lint
 on:
+  pull_request:
   push:
     branches:
       - main
       - master
-  pull_request:
+    push:
+      paths:
+        - '**.go'
+        - 'go.mod'
+        - 'go.sum'
 permissions:
   contents: read
-  # Optional: allow read access to pull requests. Use with `only-new-issues` option.
   pull-requests: read
 jobs:
   golangci:
