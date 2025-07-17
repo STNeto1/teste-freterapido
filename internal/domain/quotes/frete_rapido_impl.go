@@ -52,7 +52,13 @@ func (r *FreteRapidoQuotesRepositoryImpl) TryQuote(ctx context.Context, requestQ
 		}
 	}
 
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: log
+			_ = err
+		}
+	}()
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return FreteRapidoResponseQuote{}, system.SystemError{
