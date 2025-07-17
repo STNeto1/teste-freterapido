@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"github.com/stneto1/teste-freterapido/internal/domain/system"
@@ -13,13 +14,15 @@ import (
 
 type FreteRapidoQuotesRepositoryImpl struct {
 	quoteURLEndpoint string
+	Logger           *slog.Logger
 }
 
-func NewFreteRapidoQuotesRepositoryImpl() *FreteRapidoQuotesRepositoryImpl {
+func NewFreteRapidoQuotesRepositoryImpl(logger *slog.Logger) *FreteRapidoQuotesRepositoryImpl {
 	// TODO: make it configurable in the future
 	// enabling to do a more "e2e" test
 	return &FreteRapidoQuotesRepositoryImpl{
 		quoteURLEndpoint: "https://sp.freterapido.com/api/v3/quote/simulate",
+		Logger:           logger,
 	}
 }
 
@@ -54,8 +57,9 @@ func (r *FreteRapidoQuotesRepositoryImpl) TryQuote(ctx context.Context, requestQ
 
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: log
-			_ = err
+			r.Logger.Error("failed to close response body",
+				slog.Any("error", err),
+			)
 		}
 	}()
 
