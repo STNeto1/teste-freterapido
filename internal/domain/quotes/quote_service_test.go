@@ -3,6 +3,8 @@ package quotes_test
 import (
 	"context"
 	"fmt"
+	"io"
+	"log/slog"
 	"testing"
 	"time"
 
@@ -28,6 +30,7 @@ func TestQuoteService_CreateRequestPayload(t *testing.T) {
 		Token:             "SUT",
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
+		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -115,6 +118,7 @@ func TestQuoteService_GetFreteRapidoQuotes_InvalidPayload(t *testing.T) {
 		Token:             "SUT",
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
+		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -176,6 +180,7 @@ func TestQuoteService_GetFreteRapidoQuotes_SuccessfulValidation(t *testing.T) {
 		Token:             "SUT",
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
+		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -227,6 +232,7 @@ func TestQuoteService_GetFreteRapidoQuotes_TryQuotesFailure(t *testing.T) {
 		Token:             "SUT",
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
+		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -328,6 +334,7 @@ func TestQuoteService_GetFreteRapidoQuotes_TryQuotesValidReturn(t *testing.T) {
 		Token:             "SUT",
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
+		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -381,6 +388,7 @@ func TestQuoteService_ProcessQuotes_BadInput(t *testing.T) {
 		Token:             "SUT",
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
+		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -410,6 +418,7 @@ func TestQuoteService_ProcessQuotes_Successful(t *testing.T) {
 		Token:             "SUT",
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
+		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -447,6 +456,7 @@ func TestQuoteService_ProcessQuotes_Failure(t *testing.T) {
 		Token:             "SUT",
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
+		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 

@@ -114,16 +114,16 @@ func (s *QuoteService) GetFreteRapidoQuotes(ctx context.Context, req *RequestQuo
 
 // ProcessQuotes saves quotes to clickhouse, doesn't return anything because it's async
 func (s *QuoteService) ProcessQuotes(ctx context.Context, quotes []Quote) {
-	slog.Info("processing quotes")
+	s.config.Logger.Info("processing quotes")
 
 	if len(quotes) == 0 {
-		slog.Error("no quotes to save")
+		s.config.Logger.Error("no quotes to save")
 		return
 	}
 
 	// TODO: handle retries
 	if err := s.clickhouseRepository.AddQuotes(ctx, quotes); err != nil {
-		slog.Error("failed to save quotes to clickhouse",
+		s.config.Logger.Error("failed to save quotes to clickhouse",
 			slog.Any("error", err),
 		)
 		return

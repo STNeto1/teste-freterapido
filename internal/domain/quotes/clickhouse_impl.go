@@ -12,9 +12,10 @@ import (
 
 type ClickhouseQuotesRepositoryImpl struct {
 	ClickhouseConn driver.Conn
+	Logger         *slog.Logger
 }
 
-func NewClickhouseQuotesRepositoryImpl() *ClickhouseQuotesRepositoryImpl {
+func NewClickhouseQuotesRepositoryImpl(logger *slog.Logger) *ClickhouseQuotesRepositoryImpl {
 	// TODO: HARD dependency, should be injected, but for the purposes of the test, it's fine :)
 	conn, err := clickhouse.Open(&clickhouse.Options{
 		Addr: []string{"192.168.1.7:9000"},
@@ -27,7 +28,7 @@ func NewClickhouseQuotesRepositoryImpl() *ClickhouseQuotesRepositoryImpl {
 	})
 
 	if err != nil {
-		slog.Error("failed to connect to clickhouse",
+		logger.Error("failed to connect to clickhouse",
 			slog.Any("error", err),
 		)
 		os.Exit(1)
@@ -35,7 +36,7 @@ func NewClickhouseQuotesRepositoryImpl() *ClickhouseQuotesRepositoryImpl {
 
 	if err := conn.Ping(context.Background()); err != nil {
 		if exception, ok := err.(*clickhouse.Exception); ok {
-			slog.Error("failed to ping clickhouse",
+			logger.Error("failed to ping clickhouse",
 				slog.Any("code", exception.Code),
 				slog.String("message", exception.Message),
 				slog.String("stacktrace", exception.StackTrace),
@@ -46,6 +47,7 @@ func NewClickhouseQuotesRepositoryImpl() *ClickhouseQuotesRepositoryImpl {
 
 	return &ClickhouseQuotesRepositoryImpl{
 		ClickhouseConn: conn,
+		Logger:         logger,
 	}
 }
 
@@ -56,7 +58,7 @@ func (r *ClickhouseQuotesRepositoryImpl) AddQuotes(ctx context.Context, quotes [
 	}
 	defer func() {
 		if err := batch.Close(); err != nil {
-			slog.Error("failed to close batch",
+			r.Logger.Error("failed to close batch",
 				slog.Any("error", err),
 			)
 		}
@@ -71,7 +73,7 @@ func (r *ClickhouseQuotesRepositoryImpl) AddQuotes(ctx context.Context, quotes [
 			quote.Price,
 		); err != nil {
 			if err := batch.Abort(); err != nil {
-				slog.Error("failed to close abort batch",
+				r.Logger.Error("failed to close abort batch",
 					slog.Any("error", err),
 				)
 			}
@@ -81,7 +83,7 @@ func (r *ClickhouseQuotesRepositoryImpl) AddQuotes(ctx context.Context, quotes [
 	}
 
 	if err := batch.Send(); err != nil {
-		slog.Error("failed to close send batch",
+		r.Logger.Error("failed to close send batch",
 			slog.Any("error", err),
 		)
 		return errors.Join(errors.New("failed to send batch"), err)
