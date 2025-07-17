@@ -6,19 +6,23 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/stneto1/teste-freterapido/internal/domain/system"
 	"github.com/stneto1/teste-freterapido/internal/utils"
 )
 
 type QuoteService struct {
+	config                *system.QuotesServiceConfig
 	freteRapidoRepository FreteRapidoQuotesRepository
 	clickhouseRepository  ClickhouseQuotesRepository
 }
 
 func NewQuoteService(
+	config *system.QuotesServiceConfig,
 	freteRapidoRepository FreteRapidoQuotesRepository,
 	clickhouseRepository ClickhouseQuotesRepository,
 ) *QuoteService {
 	return &QuoteService{
+		config:                config,
 		freteRapidoRepository: freteRapidoRepository,
 		clickhouseRepository:  clickhouseRepository,
 	}
@@ -27,21 +31,19 @@ func NewQuoteService(
 func (s *QuoteService) CreateRequestPayload(requestQuote *RequestQuote) FreteRapidoRequestQuote {
 	return FreteRapidoRequestQuote{
 		Shipper: FreteRapidoRequestShipper{
-			RegisteredNumber: "SUT",
-			Token:            "SUT",
-			PlatformCode:     "SUT",
+			RegisteredNumber: s.config.RegisteredNumber,
+			Token:            s.config.Token,
+			PlatformCode:     s.config.PlatformCode,
 		},
 		Recipient: FreteRapidoRequestRecipient{
-			Type:             0,
-			RegisteredNumber: "SUT",
-			StateInscription: "SUT",
-			Country:          "BRA",
-			// Zipcode:          requestQuote.Recipient.Address.Zipcode,
+			Type:    0,
+			Country: "BRA",
+			Zipcode: requestQuote.MustParseRecipientZipcode(),
 		},
 		Dispatchers: []FreteRapidoRequestDispatchers{
 			{
-				RegisteredNumber: "SUT",
-				Zipcode:          0, // TODO: use option from config
+				RegisteredNumber: s.config.RegisteredNumber,
+				Zipcode:          s.config.DispatcherZipCode,
 				// TotalPrice:       0, // TODO: reduce from volumes?
 				Volumes: utils.Map(requestQuote.Volumes, func(vol RequestQuoteVolume) FreteRapidoRequestVolumes {
 					return FreteRapidoRequestVolumes{
@@ -104,7 +106,7 @@ func (s *QuoteService) GetFreteRapidoQuotes(ctx context.Context, req *RequestQuo
 	}
 
 	// TODO: maybe handle no quote on response?
-	go s.ProcessQuotes(ctx, quotes)
+	// go s.ProcessQuotes(ctx, quotes)
 
 	return quotes, nil
 }

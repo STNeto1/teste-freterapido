@@ -30,11 +30,11 @@ type FreteRapidoRequestRecipient struct {
 	RegisteredNumber string `json:"registered_number"`
 	StateInscription string `json:"state_inscription"`
 	Country          string `json:"country"`
-	Zipcode          int    `json:"zipcode"`
+	Zipcode          int64  `json:"zipcode"`
 }
 
 type FreteRapidoRequestVolumes struct {
-	Amount        int     `json:"amount"`
+	Amount int `json:"amount"`
 	// AmountVolumes int     `json:"amount_volumes"`
 	Category      string  `json:"category"`
 	Sku           string  `json:"sku"`
@@ -52,7 +52,7 @@ type FreteRapidoRequestVolumes struct {
 
 type FreteRapidoRequestDispatchers struct {
 	RegisteredNumber string `json:"registered_number"`
-	Zipcode          int    `json:"zipcode"`
+	Zipcode          int64  `json:"zipcode"`
 	// TotalPrice       int                         `json:"total_price"`
 	Volumes []FreteRapidoRequestVolumes `json:"volumes"`
 }

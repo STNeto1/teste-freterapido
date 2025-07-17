@@ -9,6 +9,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/shopspring/decimal"
 	"github.com/stneto1/teste-freterapido/internal/domain/quotes"
+	"github.com/stneto1/teste-freterapido/internal/domain/system"
 	"github.com/stneto1/teste-freterapido/mocks/quotesmocks"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -22,11 +23,21 @@ func TestQuoteService_CreateRequestPayload(t *testing.T) {
 
 	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
 	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
-	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+	quoteCfg := &system.QuotesServiceConfig{
+		RegisteredNumber:  "SUT",
+		Token:             "SUT",
+		PlatformCode:      "SUT",
+		DispatcherZipCode: 0,
+	}
+	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
 	result := svc.CreateRequestPayload(
 		&quotes.RequestQuote{
-			Recipient: quotes.RequestQuoteRecipient{},
+			Recipient: quotes.RequestQuoteRecipient{
+				Address: quotes.RequestQuoteRecipientAddress{
+					Zipcode: "123",
+				},
+			},
 			Volumes: []quotes.RequestQuoteVolume{
 				{
 					Category:      1,
@@ -49,11 +60,11 @@ func TestQuoteService_CreateRequestPayload(t *testing.T) {
 			PlatformCode:     "SUT",
 		},
 		Recipient: quotes.FreteRapidoRequestRecipient{
-			Type:             0,
-			RegisteredNumber: "SUT",
-			StateInscription: "SUT",
-			Country:          "BRA",
-			Zipcode:          0,
+			Type: 0,
+			// RegisteredNumber: "SUT",
+			// StateInscription: "SUT",
+			Country: "BRA",
+			Zipcode: 123,
 		},
 		Dispatchers: []quotes.FreteRapidoRequestDispatchers{
 			{
@@ -99,7 +110,13 @@ func TestQuoteService_GetFreteRapidoQuotes_InvalidPayload(t *testing.T) {
 
 	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
 	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
-	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+	quoteCfg := &system.QuotesServiceConfig{
+		RegisteredNumber:  "SUT",
+		Token:             "SUT",
+		PlatformCode:      "SUT",
+		DispatcherZipCode: 0,
+	}
+	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
 	quote := quotes.RequestQuote{
 		Recipient: quotes.RequestQuoteRecipient{
@@ -154,7 +171,13 @@ func TestQuoteService_GetFreteRapidoQuotes_SuccessfulValidation(t *testing.T) {
 			return nil
 		}).AnyTimes()
 
-	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+	quoteCfg := &system.QuotesServiceConfig{
+		RegisteredNumber:  "SUT",
+		Token:             "SUT",
+		PlatformCode:      "SUT",
+		DispatcherZipCode: 0,
+	}
+	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
 	quote := quotes.RequestQuote{
 		Recipient: quotes.RequestQuoteRecipient{
@@ -198,7 +221,14 @@ func TestQuoteService_GetFreteRapidoQuotes_TryQuotesFailure(t *testing.T) {
 		}).AnyTimes()
 
 	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
-	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+
+	quoteCfg := &system.QuotesServiceConfig{
+		RegisteredNumber:  "SUT",
+		Token:             "SUT",
+		PlatformCode:      "SUT",
+		DispatcherZipCode: 0,
+	}
+	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
 	quote := quotes.RequestQuote{
 		Recipient: quotes.RequestQuoteRecipient{
@@ -293,7 +323,13 @@ func TestQuoteService_GetFreteRapidoQuotes_TryQuotesValidReturn(t *testing.T) {
 			return nil
 		}).AnyTimes()
 
-	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+	quoteCfg := &system.QuotesServiceConfig{
+		RegisteredNumber:  "SUT",
+		Token:             "SUT",
+		PlatformCode:      "SUT",
+		DispatcherZipCode: 0,
+	}
+	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
 	quote := quotes.RequestQuote{
 		Recipient: quotes.RequestQuoteRecipient{
@@ -340,7 +376,13 @@ func TestQuoteService_ProcessQuotes_BadInput(t *testing.T) {
 			return nil
 		}).Times(0)
 
-	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+	quoteCfg := &system.QuotesServiceConfig{
+		RegisteredNumber:  "SUT",
+		Token:             "SUT",
+		PlatformCode:      "SUT",
+		DispatcherZipCode: 0,
+	}
+	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
 	quotes := []quotes.Quote{}
 
@@ -363,7 +405,13 @@ func TestQuoteService_ProcessQuotes_Successful(t *testing.T) {
 			return nil
 		}).Times(1)
 
-	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+	quoteCfg := &system.QuotesServiceConfig{
+		RegisteredNumber:  "SUT",
+		Token:             "SUT",
+		PlatformCode:      "SUT",
+		DispatcherZipCode: 0,
+	}
+	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
 	quotes := []quotes.Quote{
 		{
@@ -394,7 +442,13 @@ func TestQuoteService_ProcessQuotes_Failure(t *testing.T) {
 			return fmt.Errorf("SUT")
 		}).Times(1)
 
-	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+	quoteCfg := &system.QuotesServiceConfig{
+		RegisteredNumber:  "SUT",
+		Token:             "SUT",
+		PlatformCode:      "SUT",
+		DispatcherZipCode: 0,
+	}
+	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
 	quotes := []quotes.Quote{
 		{
