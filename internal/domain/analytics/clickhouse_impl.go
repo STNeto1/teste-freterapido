@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
+	"github.com/stneto1/teste-freterapido/internal/domain/system"
 )
 
 const baseQuery = `WITH last_quotes AS (SELECT *
@@ -31,32 +31,11 @@ type ClickhouseAnalyticsRepositoryImpl struct {
 }
 
 func NewClickhouseAnalyticsRepositoryImpl(logger *slog.Logger) *ClickhouseAnalyticsRepositoryImpl {
-	// TODO: HARD dependency, should be injected, but for the purposes of the test, it's fine :)
-	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{"192.168.1.7:9000"},
-		Auth: clickhouse.Auth{
-			Database: "freterapido",
-			Username: "default",
-			Password: "admin",
-		},
-		Debug: true,
-	})
-
+	conn, err := system.CreateClickhouseDatasource(logger)
 	if err != nil {
-		logger.Error("failed to connect to clickhouse",
+		logger.Error("failed to create clickhouse datasource",
 			slog.Any("error", err),
 		)
-		os.Exit(1)
-	}
-
-	if err := conn.Ping(context.Background()); err != nil {
-		if exception, ok := err.(*clickhouse.Exception); ok {
-			logger.Error("failed to ping clickhouse",
-				slog.Any("code", exception.Code),
-				slog.String("message", exception.Message),
-				slog.String("stacktrace", exception.StackTrace),
-			)
-		}
 		os.Exit(1)
 	}
 
