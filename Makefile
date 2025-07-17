@@ -12,3 +12,8 @@ mockgen:
     -destination=mocks/quotesmocks/frete_rapido_repository_mock.go \
     -package=quotesmocks \
     -typed
+	@mockgen \
+    -source=internal/domain/quotes/clickhouse_repository.go \
+    -destination=mocks/quotesmocks/clickhouse_repository_mock.go \
+    -package=quotesmocks \
+    -typed

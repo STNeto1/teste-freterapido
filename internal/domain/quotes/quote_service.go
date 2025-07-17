@@ -11,11 +11,16 @@ import (
 
 type QuoteService struct {
 	freteRapidoRepository FreteRapidoQuotesRepository
+	clickhouseRepository  ClickhouseQuotesRepository
 }
 
-func NewQuoteService(freteRapidoRepository FreteRapidoQuotesRepository) *QuoteService {
+func NewQuoteService(
+	freteRapidoRepository FreteRapidoQuotesRepository,
+	clickhouseRepository ClickhouseQuotesRepository,
+) *QuoteService {
 	return &QuoteService{
 		freteRapidoRepository: freteRapidoRepository,
+		clickhouseRepository:  clickhouseRepository,
 	}
 }
 
@@ -99,7 +104,21 @@ func (s *QuoteService) GetFreteRapidoQuotes(ctx context.Context, req *RequestQuo
 	}
 
 	// TODO: maybe handle no quote on response?
-	// TODO: send to analytics
+	go s.clickhouseRepository.AddQuotes(ctx, quotes)
 
 	return quotes, nil
+}
+
+// ProcessQuotes saves quotes to clickhouse, doesn't return anything because it's async
+func (s *QuoteService) ProcessQuotes(ctx context.Context, quotes []Quote) {
+	if len(quotes) == 0 {
+		// TODO: log
+		return
+	}
+
+	// TODO: handle retries
+	if err := s.clickhouseRepository.AddQuotes(ctx, quotes); err != nil {
+		// TODO: log
+		return
+	}
 }

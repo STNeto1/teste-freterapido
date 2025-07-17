@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/shopspring/decimal"
 	"github.com/stneto1/teste-freterapido/internal/domain/quotes"
 	"github.com/stneto1/teste-freterapido/mocks/quotesmocks"
@@ -20,8 +21,8 @@ func TestQuoteService_CreateRequestPayload(t *testing.T) {
 	defer ctrl.Finish()
 
 	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
-
-	svc := quotes.NewQuoteService(freteRapidoMock)
+	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
+	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
 
 	result := svc.CreateRequestPayload(
 		&quotes.RequestQuote{
@@ -97,8 +98,8 @@ func TestQuoteService_GetFreteRapidoQuotes_InvalidPayload(t *testing.T) {
 	defer ctrl.Finish()
 
 	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
-
-	svc := quotes.NewQuoteService(freteRapidoMock)
+	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
+	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
 
 	quote := quotes.RequestQuote{
 		Recipient: quotes.RequestQuoteRecipient{
@@ -145,7 +146,15 @@ func TestQuoteService_GetFreteRapidoQuotes_SuccessfulValidation(t *testing.T) {
 			return quotes.FreteRapidoResponseQuote{}, nil
 		}).AnyTimes()
 
-	svc := quotes.NewQuoteService(freteRapidoMock)
+	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
+	clickhouseMock.
+		EXPECT().
+		AddQuotes(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ []quotes.Quote) error {
+			return nil
+		}).AnyTimes()
+
+	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
 
 	quote := quotes.RequestQuote{
 		Recipient: quotes.RequestQuoteRecipient{
@@ -188,7 +197,8 @@ func TestQuoteService_GetFreteRapidoQuotes_TryQuotesFailure(t *testing.T) {
 			return quotes.FreteRapidoResponseQuote{}, fmt.Errorf("error")
 		}).AnyTimes()
 
-	svc := quotes.NewQuoteService(freteRapidoMock)
+	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
+	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
 
 	quote := quotes.RequestQuote{
 		Recipient: quotes.RequestQuoteRecipient{
@@ -275,7 +285,15 @@ func TestQuoteService_GetFreteRapidoQuotes_TryQuotesValidReturn(t *testing.T) {
 			}, nil
 		}).AnyTimes()
 
-	svc := quotes.NewQuoteService(freteRapidoMock)
+	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
+	clickhouseMock.
+		EXPECT().
+		AddQuotes(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ []quotes.Quote) error {
+			return nil
+		}).AnyTimes()
+
+	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
 
 	quote := quotes.RequestQuote{
 		Recipient: quotes.RequestQuoteRecipient{
@@ -296,8 +314,98 @@ func TestQuoteService_GetFreteRapidoQuotes_TryQuotesValidReturn(t *testing.T) {
 		},
 	}
 
-	resultQuotes, err := svc.GetFreteRapidoQuotes(t.Context(), &quote)
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+
+	resultQuotes, err := svc.GetFreteRapidoQuotes(ctx, &quote)
 	assert.NotNil(t, resultQuotes)
 	assert.Len(t, resultQuotes, 1)
 	assert.NoError(t, err)
+
+}
+
+func TestQuoteService_ProcessQuotes_BadInput(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
+
+	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
+	clickhouseMock.
+		EXPECT().
+		AddQuotes(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ []quotes.Quote) error {
+			return nil
+		}).Times(0)
+
+	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+
+	quotes := []quotes.Quote{}
+
+	svc.ProcessQuotes(t.Context(), quotes)
+}
+
+func TestQuoteService_ProcessQuotes_Successful(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
+
+	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
+	clickhouseMock.
+		EXPECT().
+		AddQuotes(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ []quotes.Quote) error {
+			return nil
+		}).Times(1)
+
+	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+
+	quotes := []quotes.Quote{
+		{
+			ID:        uuid.Must(uuid.NewV7()),
+			Name:      "SUT",
+			Service:   "SUT",
+			Deadline:  1,
+			Price:     decimal.NewFromFloat(1),
+			CreatedAt: time.Now(),
+		},
+	}
+
+	svc.ProcessQuotes(t.Context(), quotes)
+}
+func TestQuoteService_ProcessQuotes_Failure(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
+
+	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
+	clickhouseMock.
+		EXPECT().
+		AddQuotes(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ []quotes.Quote) error {
+			return fmt.Errorf("SUT")
+		}).Times(1)
+
+	svc := quotes.NewQuoteService(freteRapidoMock, clickhouseMock)
+
+	quotes := []quotes.Quote{
+		{
+			ID:        uuid.Must(uuid.NewV7()),
+			Name:      "SUT",
+			Service:   "SUT",
+			Deadline:  1,
+			Price:     decimal.NewFromFloat(1),
+			CreatedAt: time.Now(),
+		},
+	}
+
+	svc.ProcessQuotes(t.Context(), quotes)
 }

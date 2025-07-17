@@ -1,5 +1,7 @@
 package quotes
 
+import "context"
+
 type ClickhouseQuotesRepository interface {
-	CreateQuote(Quote) error
+	AddQuotes(context.Context, []Quote) error
 }

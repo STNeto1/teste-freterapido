@@ -3,9 +3,7 @@ package quotes
 import (
 	"fmt"
 	"strconv"
-	"time"
 
-	"github.com/gofrs/uuid"
 	"github.com/shopspring/decimal"
 )
 
@@ -171,15 +169,6 @@ var CategoryMap = map[int]string{
 	158: "Carrinho de bebê",
 	159: "Móveis infantis",
 	999: "Outros",
-}
-
-type Quote struct {
-	ID        uuid.UUID       `ch:"id"`
-	Name      string          `ch:"name"`
-	Service   string          `ch:"service"`
-	Deadline  uint8           `ch:"deadline"`
-	Price     decimal.Decimal `ch:"price"`
-	CreatedAt time.Time       `ch:"timestamp"`
 }
 
 type RequestQuoteRecipientAddress struct {
