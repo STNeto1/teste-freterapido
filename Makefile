@@ -17,3 +17,8 @@ mockgen:
     -destination=mocks/quotesmocks/clickhouse_repository_mock.go \
     -package=quotesmocks \
     -typed
+	@mockgen \
+    -source=internal/domain/analytics/clickhouse_repository.go \
+    -destination=mocks/analyticsmocks/clickhouse_repository_mock.go \
+    -package=analyticsmocks \
+    -typed

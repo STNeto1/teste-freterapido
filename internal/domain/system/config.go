@@ -9,3 +9,7 @@ type QuotesServiceConfig struct {
 	DispatcherZipCode int64
 	Logger            *slog.Logger
 }
+
+type AnalyticsServiceConfig struct {
+	Logger *slog.Logger
+}
