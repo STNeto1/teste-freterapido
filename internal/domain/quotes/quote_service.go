@@ -104,7 +104,7 @@ func (s *QuoteService) GetFreteRapidoQuotes(ctx context.Context, req *RequestQuo
 	}
 
 	// TODO: maybe handle no quote on response?
-	go s.clickhouseRepository.AddQuotes(ctx, quotes)
+	go s.ProcessQuotes(ctx, quotes)
 
 	return quotes, nil
 }
