@@ -9,7 +9,8 @@ import (
 func TestHealthHandler(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rr := httptest.NewRecorder()
-	NewRouter().ServeHTTP(rr, req)
+	// TODO: nil, nil, nil <- fix for a proper health check
+	NewRouter(nil, nil, nil).ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("expected status %d; got %d", http.StatusOK, status)
