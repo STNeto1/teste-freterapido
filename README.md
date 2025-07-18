@@ -4,7 +4,84 @@ Este documento descreve o fluxo de requisições da API, suas validações, tent
 
 ---
 
-## 🚚 POST `/quote`
+## Como executar
+
+### Local
+- É preciso ter um clickhouse local configurado de forma específica:
+  - Database: "freterapido"
+  -	Username: "default"
+  - Password: "admin"
+
+```shell
+$ go run cmd/webserver/main.go start --registered-number="25438296000158" --token="1d52a9b6b78cf07b08586152459a5c90" --platform-code="5AKVkHqCn" --dispatcher-zip-code=29161376 --clickhouse-addr="192.168.1.7:9000"
+```
+
+### Container
+- É preciso ter docker compose local. Dockerfile contém comando equivalente ao rodar local, apenas configurado para network do docker.
+```shell
+$ docker compose up
+```
+
+### Testes
+- Testes podem ser rodados localmente
+```shell
+$ go test -v ./...
+```
+- Também podem ser encontrados no repositório na aba de actions ou no último push.
+
+---
+
+## Como testar
+
+### POST `/quotes`
+```shell
+$ curl --request POST \
+  --url http://localhost:8080/quotes \
+  --header 'content-type: application/json' \
+  --data '{
+  "recipient": {
+    "address": {
+      "zipcode": "01311000"
+    }
+  },
+  "volumes": [
+    {
+      "category": 7,
+      "amount": 1,
+      "unitary_weight": 5,
+      "price": 349,
+      "sku": "abc-teste-123",
+      "height": 0.2,
+      "width": 0.2,
+      "length": 0.2
+    },
+    {
+      "category": 7,
+      "amount": 2,
+      "unitary_weight": 4,
+      "price": 556,
+      "sku": "abc-teste-527",
+      "height": 0.4,
+      "width": 0.6,
+      "length": 0.15
+    }
+  ]
+}'
+```
+
+### GET `/metrics`
+```shell
+$ curl --request GET \
+  --url http://localhost:8080/metrics
+
+$ curl --request GET \
+  --url http://localhost:8080/metrics?last_quotes=1000
+
+```
+
+---
+
+## 🚚 POST `/quotes`
 
 ### ✅ **Fluxo de sucesso**
 
