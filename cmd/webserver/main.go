@@ -1,16 +1,15 @@
 package main
 
 import (
-	"context"
 	"log/slog"
+	"net/http"
 	"os"
-	"time"
 
 	"github.com/alecthomas/kong"
-	"github.com/shopspring/decimal"
 	"github.com/stneto1/teste-freterapido/internal/domain/analytics"
 	"github.com/stneto1/teste-freterapido/internal/domain/quotes"
 	"github.com/stneto1/teste-freterapido/internal/domain/system"
+	wshttp "github.com/stneto1/teste-freterapido/internal/transport/http"
 )
 
 func main() {
@@ -27,13 +26,12 @@ func main() {
 			Summary: true,
 		}),
 	)
-	switch kongCtx.Command() {
-	case "start":
-		logger.Info("starting webserver",
-			slog.Any("args", cliArgs),
+
+	if kongCtx.Command() != "start" {
+		logger.Error("invalid command",
+			slog.String("command", kongCtx.Command()),
 		)
-	default:
-		panic(kongCtx.Command())
+		os.Exit(1)
 	}
 
 	quoteCfg := cliArgs.Start.ProcessQuoteServiceConfig(logger)
@@ -55,49 +53,17 @@ func main() {
 		clickhouseAnalyticsSource,
 	)
 
-	result, err := quoteSvc.GetFreteRapidoQuotes(context.Background(), &quotes.RequestQuote{
-		Recipient: quotes.RequestQuoteRecipient{
-			Address: quotes.RequestQuoteRecipientAddress{
-				Zipcode: "29161376",
-			},
-		},
-		Volumes: []quotes.RequestQuoteVolume{
-			{
-				Category:      7,
-				Amount:        1,
-				UnitaryWeight: 4,
-				Price:         decimal.NewFromFloat(349),
-				Sku:           "abs-teste-123",
-				Height:        0.2,
-				Width:         0.2,
-				Length:        0.2,
-			},
-		},
-	})
-
-	if err != nil {
-		quoteCfg.Logger.Error("failed to get quotes",
-			slog.String("error", err.Error()),
-		)
-		return
-	}
-
-	quoteCfg.Logger.Info("got quotes",
-		slog.Any("quotes", result),
+	router := wshttp.NewRouter(logger,
+		quoteSvc,
+		analyticsSvc,
 	)
 
-	// MAKE SURE THE GOROUTINE IS RUNNING
-	time.Sleep(time.Second * 2)
-
-	metrics, err := analyticsSvc.GetAnalytics(context.Background(), "10")
-	if err != nil {
-		analyticsCfg.Logger.Error("failed to get metrics",
+	logger.Info("starting webserver",
+		slog.String("addr", cliArgs.Start.HTTPAddr),
+	)
+	if err := http.ListenAndServe(cliArgs.Start.HTTPAddr, router); err != nil {
+		logger.Error("server error",
 			slog.String("error", err.Error()),
 		)
-		return
 	}
-
-	analyticsCfg.Logger.Info("got metrics",
-		slog.Any("metrics", metrics),
-	)
 }

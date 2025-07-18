@@ -6,6 +6,7 @@ import (
 )
 
 type Start struct {
+	HTTPAddr          string        `help:"Value to be used as the HTTP addr" default:":8080"`
 	RegisteredNumber  string        `help:"Value to be used as the registered number"`
 	Token             string        `help:"Value to be used as the token"`
 	PlatformCode      string        `help:"Value to be used as the platform code"`
