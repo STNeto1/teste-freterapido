@@ -83,8 +83,17 @@ func (s *QuoteService) GetFreteRapidoQuotes(ctx context.Context, req *RequestQuo
 		}
 	}
 
-	// TODO: make retries
-	result, err := s.freteRapidoRepository.TryQuote(ctx, s.CreateRequestPayload(req))
+	var result FreteRapidoResponseQuote
+	var err error
+	for attempt := range s.config.TryQuotesRetries {
+		result, err = s.freteRapidoRepository.TryQuote(ctx, s.CreateRequestPayload(req))
+		if err == nil {
+			break
+		}
+
+		// exponential backoff -> 100ms, 200ms, 400ms, .... LIMIT ms
+		time.Sleep(s.config.TryQuotesTimeout * (1 << attempt))
+	}
 	if err != nil {
 		return nil, QuoteRequestError{
 			Message: err.Error(),
@@ -119,11 +128,18 @@ func (s *QuoteService) ProcessQuotes(ctx context.Context, quotes []Quote) {
 		return
 	}
 
-	// TODO: handle retries
-	if err := s.clickhouseRepository.AddQuotes(ctx, quotes); err != nil {
+	var err error
+	for attempt := range s.config.AddQuotesRetries {
+		err = s.clickhouseRepository.AddQuotes(ctx, quotes)
+		if err == nil {
+			break
+		}
+		// exponential backoff -> 100ms, 200ms, 400ms, .... LIMIT ms
+		time.Sleep(s.config.TryQuotesTimeout * (1 << attempt))
+	}
+	if err != nil {
 		s.config.Logger.Error("failed to save quotes to clickhouse",
 			slog.Any("error", err),
 		)
-		return
 	}
 }

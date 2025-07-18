@@ -233,6 +233,8 @@ func TestQuoteService_GetFreteRapidoQuotes_TryQuotesFailure(t *testing.T) {
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
 		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
+		TryQuotesRetries:  1,
+		TryQuotesTimeout:  time.Millisecond,
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -335,6 +337,8 @@ func TestQuoteService_GetFreteRapidoQuotes_TryQuotesValidReturn(t *testing.T) {
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
 		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
+		TryQuotesRetries:  1,
+		TryQuotesTimeout:  time.Millisecond,
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -419,6 +423,8 @@ func TestQuoteService_ProcessQuotes_Successful(t *testing.T) {
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
 		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
+		AddQuotesRetries:  1,
+		AddQuoesTimeout:   time.Millisecond,
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -435,6 +441,7 @@ func TestQuoteService_ProcessQuotes_Successful(t *testing.T) {
 
 	svc.ProcessQuotes(t.Context(), quotes)
 }
+
 func TestQuoteService_ProcessQuotes_Failure(t *testing.T) {
 	t.Parallel()
 
@@ -457,6 +464,53 @@ func TestQuoteService_ProcessQuotes_Failure(t *testing.T) {
 		PlatformCode:      "SUT",
 		DispatcherZipCode: 0,
 		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
+		AddQuotesRetries:  1,
+		AddQuoesTimeout:   time.Millisecond,
+	}
+	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
+
+	quotes := []quotes.Quote{
+		{
+			ID:        uuid.Must(uuid.NewV7()),
+			Name:      "SUT",
+			Service:   "SUT",
+			Deadline:  1,
+			Price:     decimal.NewFromFloat(1),
+			CreatedAt: time.Now(),
+		},
+	}
+
+	svc.ProcessQuotes(t.Context(), quotes)
+}
+
+func TestQuoteService_ProcessQuotes_FailureThenWorks(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	freteRapidoMock := quotesmocks.NewMockFreteRapidoQuotesRepository(ctrl)
+
+	clickhouseMock := quotesmocks.NewMockClickhouseQuotesRepository(ctrl)
+	gomock.InOrder(
+		clickhouseMock.
+			EXPECT().
+			AddQuotes(gomock.Any(), gomock.Any()).
+			Return(fmt.Errorf("temporary failure")),
+		clickhouseMock.
+			EXPECT().
+			AddQuotes(gomock.Any(), gomock.Any()).
+			Return(nil),
+	)
+
+	quoteCfg := &system.QuotesServiceConfig{
+		RegisteredNumber:  "SUT",
+		Token:             "SUT",
+		PlatformCode:      "SUT",
+		DispatcherZipCode: 0,
+		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
+		AddQuotesRetries:  2,
+		AddQuoesTimeout:   time.Millisecond,
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
