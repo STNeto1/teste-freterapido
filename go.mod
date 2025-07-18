@@ -4,6 +4,7 @@ go 1.24.4
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.37.2
+	github.com/alecthomas/kong v1.12.0
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/shopspring/decimal v1.4.0
 	github.com/stretchr/testify v1.10.0
