@@ -15,8 +15,8 @@ type ClickhouseQuotesRepositoryImpl struct {
 	Logger         *slog.Logger
 }
 
-func NewClickhouseQuotesRepositoryImpl(logger *slog.Logger) *ClickhouseQuotesRepositoryImpl {
-	conn, err := system.CreateClickhouseDatasource(logger)
+func NewClickhouseQuotesRepositoryImpl(logger *slog.Logger, clickhouseAddr string) *ClickhouseQuotesRepositoryImpl {
+	conn, err := system.CreateClickhouseDatasource(logger, clickhouseAddr)
 	if err != nil {
 		logger.Error("failed to create clickhouse datasource",
 			slog.Any("error", err),

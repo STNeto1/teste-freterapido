@@ -30,8 +30,8 @@ type ClickhouseAnalyticsRepositoryImpl struct {
 	Logger         *slog.Logger
 }
 
-func NewClickhouseAnalyticsRepositoryImpl(logger *slog.Logger) *ClickhouseAnalyticsRepositoryImpl {
-	conn, err := system.CreateClickhouseDatasource(logger)
+func NewClickhouseAnalyticsRepositoryImpl(logger *slog.Logger, clickhouseAddr string) *ClickhouseAnalyticsRepositoryImpl {
+	conn, err := system.CreateClickhouseDatasource(logger, clickhouseAddr)
 	if err != nil {
 		logger.Error("failed to create clickhouse datasource",
 			slog.Any("error", err),

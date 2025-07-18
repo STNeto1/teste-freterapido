@@ -4,21 +4,22 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"strings"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 )
 
-func CreateClickhouseDatasource(logger *slog.Logger) (driver.Conn, error) {
+func CreateClickhouseDatasource(logger *slog.Logger, clickhouseAddr string) (driver.Conn, error) {
 	// TODO: HARD dependency, should be injected, but for the purposes of the test, it's fine :)
 	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{"192.168.1.7:9000"},
+		Addr: strings.Split(clickhouseAddr, ","),
 		Auth: clickhouse.Auth{
 			Database: "freterapido",
 			Username: "default",
 			Password: "admin",
 		},
-		Debug: false,
+		Debug: true,
 	})
 
 	if err != nil {

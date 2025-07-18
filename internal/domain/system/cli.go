@@ -6,6 +6,7 @@ import (
 )
 
 type Start struct {
+	ClickhouseAddr    string        `help:"Value to be used as the Clickhouse addr" default:"clickhouse:9000"`
 	HTTPAddr          string        `help:"Value to be used as the HTTP addr" default:":8080"`
 	RegisteredNumber  string        `help:"Value to be used as the registered number"`
 	Token             string        `help:"Value to be used as the token"`

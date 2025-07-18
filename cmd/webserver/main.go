@@ -40,8 +40,8 @@ func main() {
 	}
 
 	fastFreteSource := quotes.NewFreteRapidoQuotesRepositoryImpl(quoteCfg.Logger)
-	clickhouseQuotesSource := quotes.NewClickhouseQuotesRepositoryImpl(quoteCfg.Logger)
-	clickhouseAnalyticsSource := analytics.NewClickhouseAnalyticsRepositoryImpl(analyticsCfg.Logger)
+	clickhouseQuotesSource := quotes.NewClickhouseQuotesRepositoryImpl(quoteCfg.Logger, cliArgs.Start.ClickhouseAddr)
+	clickhouseAnalyticsSource := analytics.NewClickhouseAnalyticsRepositoryImpl(analyticsCfg.Logger, cliArgs.Start.ClickhouseAddr)
 
 	quoteSvc := quotes.NewQuoteService(
 		&quoteCfg,
