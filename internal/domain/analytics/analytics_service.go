@@ -30,13 +30,13 @@ func (s *AnalyticService) GetAnalytics(ctx context.Context, lastQuotes string) (
 	numericValue, err := strconv.ParseInt(lastQuotes, 10, 64)
 	if err != nil {
 		return nil, AnalyticsInvalidLastQuotesError{
-			Message: "Optional parameter lastQuotes must be a number",
+			Message: "Optional parameter last_quotes must be a number",
 		}
 	}
 
 	if numericValue < 0 {
 		return nil, AnalyticsInvalidLastQuotesError{
-			Message: "Optional parameter lastQuotes must be greater than 0",
+			Message: "Optional parameter last_quotes must be greater than 0",
 		}
 	}
 

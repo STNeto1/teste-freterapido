@@ -60,7 +60,7 @@ func TestAnalyticsService_GetAnalytics_InvalidNumericString(t *testing.T) {
 	result, err := svc.GetAnalytics(t.Context(), "SUT")
 	assert.Nil(t, result)
 	assert.ErrorIs(t, err, analytics.AnalyticsInvalidLastQuotesError{
-		Message: "Optional parameter lastQuotes must be a number",
+		Message: "Optional parameter last_quotes must be a number",
 	})
 }
 
@@ -87,7 +87,7 @@ func TestAnalyticsService_GetAnalytics_NegativeNumericString(t *testing.T) {
 	result, err := svc.GetAnalytics(t.Context(), "-1")
 	assert.Nil(t, result)
 	assert.ErrorIs(t, err, analytics.AnalyticsInvalidLastQuotesError{
-		Message: "Optional parameter lastQuotes must be greater than 0",
+		Message: "Optional parameter last_quotes must be greater than 0",
 	})
 }
 
