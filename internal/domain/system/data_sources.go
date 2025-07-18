@@ -18,7 +18,7 @@ func CreateClickhouseDatasource(logger *slog.Logger) (driver.Conn, error) {
 			Username: "default",
 			Password: "admin",
 		},
-		Debug: true,
+		Debug: false,
 	})
 
 	if err != nil {
