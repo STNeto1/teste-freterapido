@@ -86,7 +86,7 @@ $ curl --request GET \
 ### ✅ **Fluxo de sucesso**
 
 ```
-Cliente → [POST /quote] → API → Validação → OK
+Cliente → [POST /quotes] → API → Validação → OK
                                       ↓
                                Tenta cotação → 2xx
                                       ↓
@@ -104,7 +104,7 @@ Cliente → [POST /quote] → API → Validação → OK
 ### ❌ **Fluxo de validação inválida**
 
 ```
-Cliente → [POST /quote] → API → Validação → Inválido → Responde 400
+Cliente → [POST /quotes] → API → Validação → Inválido → Responde 400
 ```
 
 * Se os dados forem inválidos, a API retorna **HTTP 400 Bad Request** imediatamente.
@@ -114,7 +114,7 @@ Cliente → [POST /quote] → API → Validação → Inválido → Responde 400
 ### ❌ **Fluxo de falha na cotação**
 
 ```
-Cliente → [POST /quote] → API → Validação → OK
+Cliente → [POST /quotes] → API → Validação → OK
                                       ↓
                       Tenta cotação (1ª tentativa) → Falha
                       Tenta cotação (2ª tentativa) → Falha
