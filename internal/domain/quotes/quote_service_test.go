@@ -424,7 +424,7 @@ func TestQuoteService_ProcessQuotes_Successful(t *testing.T) {
 		DispatcherZipCode: 0,
 		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 		AddQuotesRetries:  1,
-		AddQuotesTimeout:   time.Millisecond,
+		AddQuotesTimeout:  time.Millisecond,
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -465,7 +465,7 @@ func TestQuoteService_ProcessQuotes_Failure(t *testing.T) {
 		DispatcherZipCode: 0,
 		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 		AddQuotesRetries:  1,
-		AddQuotesTimeout:   time.Millisecond,
+		AddQuotesTimeout:  time.Millisecond,
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
@@ -510,7 +510,7 @@ func TestQuoteService_ProcessQuotes_FailureThenWorks(t *testing.T) {
 		DispatcherZipCode: 0,
 		Logger:            slog.New(slog.NewJSONHandler(io.Discard, nil)),
 		AddQuotesRetries:  2,
-		AddQuotesTimeout:   time.Millisecond,
+		AddQuotesTimeout:  time.Millisecond,
 	}
 	svc := quotes.NewQuoteService(quoteCfg, freteRapidoMock, clickhouseMock)
 
