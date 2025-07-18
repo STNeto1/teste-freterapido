@@ -14,7 +14,7 @@ type QuotesServiceConfig struct {
 	TryQuotesRetries  int
 	TryQuotesTimeout  time.Duration
 	AddQuotesRetries  int
-	AddQuoesTimeout   time.Duration
+	AddQuotesTimeout  time.Duration
 }
 
 type AnalyticsServiceConfig struct {
