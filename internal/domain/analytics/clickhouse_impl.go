@@ -61,7 +61,8 @@ func (r *ClickhouseAnalyticsRepositoryImpl) GetMetrics(ctx context.Context, last
 		return nil, errors.Join(errors.New("failed to query"), err)
 	}
 
-	var metrics []ServiceMetrics
+	metrics := make([]ServiceMetrics, 0)
+
 	for rows.Next() {
 		var metric ServiceMetrics
 		if err := rows.ScanStruct(&metric); err != nil {
