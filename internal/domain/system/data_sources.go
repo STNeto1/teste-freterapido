@@ -19,7 +19,7 @@ func CreateClickhouseDatasource(logger *slog.Logger, clickhouseAddr string) (dri
 			Username: "default",
 			Password: "admin",
 		},
-		Debug: true,
+		Debug: false,
 	})
 
 	if err != nil {
