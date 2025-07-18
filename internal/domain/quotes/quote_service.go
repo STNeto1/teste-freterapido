@@ -114,7 +114,7 @@ func (s *QuoteService) GetFreteRapidoQuotes(ctx context.Context, req *RequestQuo
 		}
 	}
 
-	go s.ProcessQuotes(ctx, quotes)
+	go s.ProcessQuotes(context.Background(), quotes)
 
 	return quotes, nil
 }
