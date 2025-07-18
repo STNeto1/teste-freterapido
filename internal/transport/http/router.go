@@ -28,8 +28,9 @@ func NewRouter(
 		analyticsSvc: analyticsSvc,
 	}
 
-	router.HandleFunc("/health", router.HealthHandler)
-	router.HandleFunc("/metrics", router.MetricsHandler)
+	router.HandleFunc("GET /health", router.HealthHandler)
+	router.HandleFunc("GET /metrics", router.MetricsHandler)
+	router.HandleFunc("POST /quotes", router.QuotesHandler)
 
 	return &router
 }

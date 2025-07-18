@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"errors"
 	"log/slog"
 	"net/http"
 
@@ -14,7 +13,7 @@ func (router *Router) MetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err := router.analyticsSvc.GetAnalytics(r.Context(), lastQuotes)
 	if err != nil {
-		if errors.Is(err, analytics.AnalyticsInvalidLastQuotesError{}) {
+		if _, ok := err.(analytics.AnalyticsInvalidLastQuotesError); ok {
 			w.WriteHeader(http.StatusBadRequest)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
